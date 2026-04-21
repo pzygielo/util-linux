@@ -177,6 +177,19 @@ static const char *get_supported_runtime_param_policies(void)
 #endif
 }
 
+static struct path_cxt *get_tasks_or_err(pid_t pid)
+{
+	struct path_cxt *pc = NULL;
+
+	if (!pid)
+		pid = getpid();
+
+	pc = ul_new_procfs_path(pid, NULL);
+	if (!pc)
+		err(EXIT_FAILURE, _("cannot obtain the list of tasks for PID '%d'"), pid);
+	return pc;
+}
+
 static void show_sched_pid_info(struct chrt_ctl *ctl, pid_t pid)
 {
 	int policy = -1, reset_on_fork = 0, prio = 0;
@@ -277,7 +290,9 @@ static void show_sched_info(struct chrt_ctl *ctl)
 #ifdef __linux__
 		DIR *sub = NULL;
 		pid_t tid;
-		struct path_cxt *pc = ul_new_procfs_path(ctl->pid, NULL);
+		struct path_cxt *pc = NULL;
+
+		pc = get_tasks_or_err(ctl->pid);
 
 		while (pc && procfs_process_next_tid(pc, &sub, &tid) == 0)
 			show_sched_pid_info(ctl, tid);
@@ -382,16 +397,16 @@ static int set_sched_one(struct chrt_ctl *ctl, pid_t pid)
 }
 #endif /* HAVE_SCHED_SETATTR */
 
+
 static void set_sched(struct chrt_ctl *ctl)
 {
 	if (ctl->all_tasks) {
 #ifdef __linux__
 		DIR *sub = NULL;
 		pid_t tid;
-		struct path_cxt *pc = ul_new_procfs_path(ctl->pid, NULL);
+		struct path_cxt *pc = NULL;
 
-		if (!pc)
-			err(EXIT_FAILURE, _("cannot obtain the list of tasks"));
+		pc = get_tasks_or_err(ctl->pid);
 
 		while (procfs_process_next_tid(pc, &sub, &tid) == 0) {
 			if (set_sched_one(ctl, tid) == -1)
