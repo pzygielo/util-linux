@@ -402,7 +402,7 @@ static void set_sched(struct chrt_ctl *ctl)
 		err(EXIT_FAILURE, _("cannot obtain the list of tasks"));
 #endif
 	} else if (set_sched_one(ctl, ctl->pid) == -1)
-		err(EXIT_FAILURE, _("failed to set pid %d's policy"), ctl->pid);
+		err(EXIT_FAILURE, _("failed to set pid %d's policy"), ctl->pid ? ctl->pid : getpid());
 
 	ctl->altered = 1;
 }
