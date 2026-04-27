@@ -425,9 +425,6 @@ static void set_sched(struct chrt_ctl *ctl)
 int main(int argc, char **argv)
 {
 	struct chrt_ctl _ctl = {
-		.parse_pid = 0,
-		.pid = 0,
-		.pidfd_ino = 0,
 		.pidfd = -1,
 		.policy = SCHED_RR
 	}, *ctl = &_ctl;
