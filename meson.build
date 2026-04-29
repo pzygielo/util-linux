@@ -2069,14 +2069,16 @@ if opt and not is_disabler(exe)
   bashcompletions += ['chcpu']
 endif
 
+opt = get_option('build-wdctl').allowed()
 exe = executable(
   'wdctl',
   wdctl_sources,
   include_directories : includes,
   link_with : [lib_common,
                lib_smartcols],
-  install : true)
-if not is_disabler(exe)
+  install : opt,
+  build_by_default : opt)
+if opt and not is_disabler(exe)
   exes += exe
   manadocs += wdctl_manadocs
   bashcompletions += ['wdctl']
