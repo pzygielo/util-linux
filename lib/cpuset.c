@@ -361,7 +361,8 @@ int cpulist_parse(const char *str, cpu_set_t *set, size_t setsize, int fail)
 		unsigned int s;	/* stride */
 		const char *c1, *c2;
 
-		if (nextnumber(p, &end, &a) != 0)
+		if (nextnumber(p, &end, &a) != 0 ||
+			(*end && *end != ',' && *end != '-'))
 			return 1;
 		b = a;
 		s = 1;
@@ -371,13 +372,15 @@ int cpulist_parse(const char *str, cpu_set_t *set, size_t setsize, int fail)
 		c2 = nexttoken(p, ',');
 
 		if (c1 != NULL && (c2 == NULL || c1 < c2)) {
-			if (nextnumber(c1, &end, &b) != 0)
+			if (nextnumber(c1, &end, &b) != 0 ||
+				(*end && *end != ',' && *end != ':'))
 				return 1;
 
-			c1 = end && *end ? nexttoken(end, ':') : NULL;
+			c1 = nexttoken(end, ':');
 
 			if (c1 != NULL && (c2 == NULL || c1 < c2)) {
-				if (nextnumber(c1, &end, &s) != 0)
+				if (nextnumber(c1, &end, &s) != 0 ||
+					(*end && *end != ','))
 					return 1;
 				if (s == 0)
 					return 1;
