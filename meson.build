@@ -253,7 +253,9 @@ summary('libsmartcols', build_libsmartcols ? 'enabled' : 'disabled', section : '
 build_libfdisk = get_option('build-libfdisk').require(get_option('build-libblkid').allowed()).allowed()
 summary('libfdisk', build_libfdisk ? 'enabled' : 'disabled', section : 'components')
 
-build_uuidd = get_option('build-uuidd').allowed()
+build_uuidd = get_option('build-uuidd') \
+              .require(conf.get('HAVE_SYS_SIGNALFD_H').to_string() == '1') \
+              .allowed()
 conf.set('HAVE_UUIDD', build_uuidd ? 1 : false)
 summary('uuidd', build_uuidd ? 'enabled' : 'disabled', section : 'components')
 
