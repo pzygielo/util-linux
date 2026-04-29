@@ -1916,7 +1916,9 @@ if opt and not is_disabler(exe)
   bashcompletions += ['zramctl']
 endif
 
-opt = get_option('build-prlimit').allowed()
+opt = get_option('build-prlimit') \
+      .require(conf.get('HAVE_PRLIMIT').to_string() == '1') \
+      .allowed()
 exe = executable(
   'prlimit',
   prlimit_sources,
