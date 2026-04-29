@@ -1916,6 +1916,7 @@ if opt and not is_disabler(exe)
   bashcompletions += ['zramctl']
 endif
 
+opt = get_option('build-prlimit').allowed()
 exe = executable(
   'prlimit',
   prlimit_sources,
@@ -1923,8 +1924,9 @@ exe = executable(
   link_with : [lib_common,
                lib_smartcols],
   install_dir : usrbin_exec_dir,
-  install : true)
-if not is_disabler(exe)
+  install : opt,
+  build_by_default : opt)
+if opt and not is_disabler(exe)
   exes += exe
   manadocs += prlimit_manadocs
   bashcompletions += ['prlimit']

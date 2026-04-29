@@ -263,6 +263,8 @@ option('build-getino', type : 'feature',
        description : 'build getino')
 option('build-copyfilerange', type : 'feature',
        description : 'build copyfilerange')
+option('build-prlimit', type : 'feature',
+       description : 'build prlimit')
 
 # static programs
 
