@@ -3336,7 +3336,9 @@ if opt and not is_disabler(exe)
   bashcompletions += ['hardlink']
 endif
 
-opt = get_option('build-pipesz').allowed()
+opt = get_option('build-pipesz') \
+      .require(cc.has_header_symbol('fcntl.h', 'F_GETPIPE_SZ')) \
+      .allowed()
 exe = executable(
   'pipesz',
   pipesz_sources,
