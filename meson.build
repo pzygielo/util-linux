@@ -2069,7 +2069,9 @@ if opt and not is_disabler(exe)
   bashcompletions += ['chcpu']
 endif
 
-opt = get_option('build-wdctl').allowed()
+opt = get_option('build-wdctl') \
+      .require(conf.get('HAVE_LINUX_WATCHDOG_H').to_string() == '1') \
+      .allowed()
 exe = executable(
   'wdctl',
   wdctl_sources,
