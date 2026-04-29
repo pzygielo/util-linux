@@ -76,6 +76,10 @@ ts_init_subtest "parse-range"
 $TS_CMD_BITS -g 50-100 75-150 >> "$TS_OUTPUT" 2>> "$TS_ERRLOG"
 ts_finalize_subtest
 
+ts_init_subtest "parse-invalid"
+$TS_CMD_BITS -l 1,2,3abc,4 >> $TS_OUTPUT 2>> $TS_ERRLOG
+ts_finalize_subtest
+
 ts_init_subtest "parse-grouped-mask"
 $TS_CMD_BITS -l ,9000000,00000000,0c000000,00000000 >> "$TS_OUTPUT" 2>> "$TS_ERRLOG"
 ts_finalize_subtest
