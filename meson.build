@@ -2834,7 +2834,9 @@ endif
 # chgrp tty $(DESTDIR)$(usrbin_execdir)/wall
 # chmod g+s $(DESTDIR)$(usrbin_execdir)/wall
 
-opt = get_option('build-write').allowed()
+opt = get_option('build-write') \
+      .require(cc.has_header_symbol('paths.h', '_PATH_UTMP')) \
+      .allowed()
 exe = executable(
   'write',
   write_sources,
