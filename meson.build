@@ -2139,10 +2139,10 @@ if opt and not is_disabler(exe)
   bashcompletions += ['pivot_root']
 endif
 
-opt = get_option('build-switch_root').allowed()
-if opt and not have_dirfd and not have_ddfd
-  error('neither dirfd nor ddfd are available')
-endif
+opt = get_option('build-switch_root') \
+      .require(have_dirfd or have_ddfd) \
+      .require(conf.get('HAVE_SYS_STATFS_H').to_string() == '1') \
+      .allowed()
 exe = executable(
   'switch_root',
   switch_root_sources,
