@@ -63,8 +63,11 @@ static void parse_mask_or_list(const char *cmdline_arg,
 		if (cpumask_parse(arg, bits, size) < 0)
 			errx(EXIT_FAILURE, _("error: invalid bit mask: %s"), cmdline_arg);
 	} else {
-		if (cpulist_parse(arg, bits, size, 1))
+		int rc = cpulist_parse(arg, bits, size, 1);
+		if (rc == 1)
 			errx(EXIT_FAILURE, _("error: invalid bit list: %s"), cmdline_arg);
+		else if (rc == 2)
+			errx(EXIT_FAILURE, _("error: bit list wider than cpuset size: %s"), cmdline_arg);
 	}
 
 	/* truncate all bits beyond the requested mask size */
