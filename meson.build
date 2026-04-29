@@ -2185,7 +2185,9 @@ if opt and not is_disabler(exe)
   exes += exe
 endif
 
-opt = get_option('build-nsenter').allowed()
+opt = get_option('build-nsenter') \
+      .require(conf.get('HAVE_SYS_STATFS_H').to_string() == '1') \
+      .allowed()
 exe = executable(
   'nsenter',
   nsenter_sources,
