@@ -623,6 +623,7 @@ funcs = '''
         __fpurge
         fpurge
         __fpending
+        sched_getscheduler
         secure_getenv
         __secure_getenv
         eaccess
@@ -3477,7 +3478,11 @@ endif
 
 ############################################################
 
-opt = get_option('build-schedutils').allowed()
+opt = get_option('build-schedutils') \
+      .require(conf.get('HAVE_SCHED_GETSCHEDULER').to_string() == '1') \
+      .require(conf.get('HAVE_SYS_PRCTL_H').to_string() == '1') \
+      .require(conf.get('HAVE_CPU_SET_T').to_string() == '1') \
+      .allowed()
 exe = executable(
   'chrt',
   'schedutils/chrt.c',
