@@ -2757,7 +2757,9 @@ if opt and not is_disabler(exe)
   bashcompletions += ['scriptreplay']
 endif
 
-opt = get_option('build-agetty').allowed()
+opt = get_option('build-agetty') \
+      .require(cc.has_header_symbol('paths.h', '_PATH_UTMP')) \
+      .allowed()
 exe = executable(
   'agetty',
   agetty_sources,
