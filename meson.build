@@ -2868,7 +2868,9 @@ if opt and not is_disabler(exe)
   manadocs += login_manadocs
 endif
 
-opt = get_option('build-sulogin').allowed()
+opt = get_option('build-sulogin') \
+      .require(conf.get('HAVE_SHADOW_H').to_string() == '1') \
+      .allowed()
 exe = executable(
   'sulogin',
   sulogin_sources,
