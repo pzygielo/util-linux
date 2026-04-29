@@ -3297,7 +3297,9 @@ if opt and not is_disabler(exe)
   bashcompletions += ['getopt']
 endif
 
-opt = get_option('build-fincore').allowed()
+opt = get_option('build-fincore') \
+      .require(LINUX) \
+      .allowed()
 exe = executable(
   'fincore',
   fincore_sources,
