@@ -265,6 +265,8 @@ option('build-copyfilerange', type : 'feature',
        description : 'build copyfilerange')
 option('build-prlimit', type : 'feature',
        description : 'build prlimit')
+option('build-fincore', type : 'feature',
+       description : 'build fincore')
 
 # static programs
 
