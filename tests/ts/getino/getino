@@ -19,6 +19,13 @@ TS_DESC="getino"
 
 . "$TS_TOPDIR/functions.sh"
 ts_init "$*"
+ts_skip_nonroot
+
+ts_check_test_command "$TS_CMD_GETINO"
+ts_check_test_command "$TS_CMD_UNSHARE"
+ts_check_test_command "$TS_CMD_RUNUSER"
+ts_check_test_command "$TS_HELPER_STRERROR"
+ts_check_prog "stat"
 
 # make sure we do not use shell built-in command
 if [ "$TS_USE_SYSTEM_COMMANDS" == "yes" ]; then
@@ -31,8 +38,6 @@ fi
 if ts_kernel_ver_lt 6 9; then
 	TS_KNOWN_FAIL="yes"
 fi
-
-ts_check_test_command "$TS_CMD_GETINO"
 
 ts_init_subtest "single-pid"
 if "$TS_CMD_GETINO" 1 &>/dev/null; then
@@ -58,5 +63,76 @@ if [ -n "$res" ]; then
   echo "ok" > "$TS_OUTPUT"
 fi
 ts_finalize_subtest
+
+ts_init_subtest "ipcns"
+ts_ipc_ns=$("$TS_CMD_GETINO" --ipcns $$ 2>>"$TS_ERRLOG")
+unshare_ipc_ns=$("$TS_CMD_UNSHARE" --ipc bash -c "$TS_CMD_GETINO --ipcns \$\$" 2>>"$TS_ERRLOG")
+if (( ts_ipc_ns == unshare_ipc_ns )); then
+  ts_failed_subtest "IPC namespace unchanged"
+fi
+ts_finalize_subtest
+
+ts_init_subtest "netns"
+ts_net_ns=$("$TS_CMD_GETINO" --netns $$ 2>>"$TS_ERRLOG")
+unshare_net_ns=$("$TS_CMD_UNSHARE" --net bash -c "$TS_CMD_GETINO --netns \$\$" 2>>"$TS_ERRLOG")
+if (( ts_net_ns == unshare_net_ns )); then
+  ts_failed_subtest "network namespace unchanged"
+fi
+ts_finalize_subtest
+
+ts_init_subtest "mntns"
+ts_mnt_ns=$("$TS_CMD_GETINO" --mntns $$ 2>>"$TS_ERRLOG")
+unshare_mnt_ns=$("$TS_CMD_UNSHARE" --mount bash -c "$TS_CMD_GETINO --mntns \$\$" 2>>"$TS_ERRLOG")
+if (( ts_mnt_ns == unshare_mnt_ns )); then
+  ts_failed_subtest "mount namespace unchanged"
+fi
+ts_finalize_subtest
+
+ts_init_subtest "utsns"
+ts_uts_ns=$("$TS_CMD_GETINO" --utsns $$ 2>>"$TS_ERRLOG")
+unshare_uts_ns=$("$TS_CMD_UNSHARE" --uts bash -c "$TS_CMD_GETINO --utsns \$\$" 2>>"$TS_ERRLOG")
+if (( ts_uts_ns == unshare_uts_ns )); then
+  ts_failed_subtest "UTS namespace unchanged"
+fi
+ts_finalize_subtest
+
+ts_init_subtest "timens"
+ts_time_ns=$("$TS_CMD_GETINO" --timens $$ 2>>"$TS_ERRLOG")
+unshare_time_ns=$("$TS_CMD_UNSHARE" --time bash -c "$TS_CMD_GETINO --timens \$\$" 2>>"$TS_ERRLOG")
+if (( ts_time_ns == unshare_time_ns )); then
+  ts_failed_subtest "time namespace unchanged"
+fi
+ts_finalize_subtest
+
+ts_init_subtest "pidns"
+ts_pid_ns=$("$TS_CMD_GETINO" --pidns $$ 2>>"$TS_ERRLOG")
+unshare_pid_ns=$("$TS_CMD_UNSHARE" --pid --fork bash -c "$TS_CMD_GETINO --pidns \$\$" 2>>"$TS_ERRLOG")
+if (( ts_pid_ns == unshare_pid_ns )); then
+  ts_failed_subtest "pid namespace unchanged"
+fi
+ts_finalize_subtest
+
+ts_init_subtest "cgroupns"
+ts_cgroup_ns=$("$TS_CMD_GETINO" --cgroupns $$ 2>>"$TS_ERRLOG")
+unshare_cgroup_ns=$("$TS_CMD_UNSHARE" --cgroup bash -c "$TS_CMD_GETINO --cgroupns \$\$" 2>>"$TS_ERRLOG")
+if (( ts_cgroup_ns == unshare_cgroup_ns )); then
+  ts_failed_subtest "cgroup namespace unchanged"
+fi
+ts_finalize_subtest
+
+ts_init_subtest "userns"
+getino_owner="$(stat --format=%U "$TS_CMD_GETINO")"
+ts_user_ns=$("$TS_CMD_GETINO" --userns $$ 2>>"$TS_ERRLOG")
+unshare_user_ns=$("$TS_CMD_RUNUSER" --user "$getino_owner" -- \
+                    "$TS_CMD_UNSHARE" --user \
+                      bash -c "$TS_CMD_GETINO --userns \$\$" 2>>"$TS_ERRLOG")
+
+if grep "$("$TS_HELPER_STRERROR" EACCES)" "$TS_ERRLOG" &>/dev/null; then
+  ts_skip_subtest "missing permissions to obtain user namespace"
+else
+  (( ts_user_ns == unshare_user_ns )) && ts_failed_subtest "user namespace unchanged"
+fi
+ts_finalize_subtest
+
 
 ts_finalize
