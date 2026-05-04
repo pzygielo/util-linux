@@ -70,7 +70,7 @@
 #include "signames.h"
 #include "pty-session.h"
 #include "debug.h"
-#include "shells.h"
+#include "default_shell.h"
 #include "fileutils.h"
 
 static UL_DEBUG_DEFINE_MASK(script);
