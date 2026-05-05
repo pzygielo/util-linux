@@ -84,4 +84,16 @@ $TS_CMD_SFDISK --list -o START,END,SIZE,UUID,TYPE,NAME ${TS_DEVICE} >> $TS_OUTPU
 ts_fdisk_clean $TS_DEVICE
 ts_finalize_subtest
 
+
+ts_init_subtest "no-device-names"
+$TS_CMD_SFDISK --dump --no-device-names ${TS_DEVICE} >> $TS_OUTPUT 2>> $TS_ERRLOG
+ts_fdisk_clean $TS_DEVICE
+ts_finalize_subtest
+
+
+ts_init_subtest "no-device-names-json"
+$TS_CMD_SFDISK --dump --no-device-names --json ${TS_DEVICE} >> $TS_OUTPUT 2>> $TS_ERRLOG
+ts_fdisk_clean $TS_DEVICE
+ts_finalize_subtest
+
 ts_finalize
