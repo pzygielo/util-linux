@@ -118,7 +118,7 @@ ts_finalize_subtest
 
 ts_init_subtest "relative-path"
 cd "$TS_OUTDIR" > /dev/null
-$TS_CMD_MOUNT --all --fstab $(basename "${TS_FSTAB}") >> "$TS_OUTPUT" 2>> "$TS_ERRLOG" \
+$TS_CMD_MOUNT --all --fstab "$(basename "${TS_FSTAB}")" >> "$TS_OUTPUT" 2>> "$TS_ERRLOG" \
 			|| ts_log "mount failed"
 udevadm settle
 $TS_CMD_UMOUNT ${MOUNTPOINT}{A,B,C,D} || ts_log "umount failed"
