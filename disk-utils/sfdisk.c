@@ -120,7 +120,8 @@ struct sfdisk {
 		     movedata: 1,	/* move data after resize */
 		     movefsync: 1,	/* use fsync() after each write() */
 		     notell : 1,	/* don't tell kernel about new PT */
-		     noact  : 1;	/* do not write to device */
+		     noact  : 1,	/* do not write to device */
+		     no_device_names  : 1;	/* do not display device names in partition rows */
 };
 
 #define SFDISK_PROMPT	">>> "
@@ -1067,6 +1068,9 @@ static int command_dump(struct sfdisk *sf, int argc, char **argv)
 	dp = fdisk_new_script(sf->cxt);
 	if (!dp)
 		err(EXIT_FAILURE, _("failed to allocate dump struct"));
+
+	if (sf->no_device_names)
+		fdisk_script_disable_devnames(dp, 1);
 
 	rc = fdisk_script_read_context(dp, NULL);
 	if (rc)
@@ -2185,6 +2189,7 @@ static void __attribute__((__noreturn__)) usage(void)
 	      _("     --lock[=<mode>]       use exclusive device lock (%s, %s or %s)\n"), "yes", "no", "nonblock");
 	fputs(_(" -N, --partno <num>        specify partition number\n"), out);
 	fputs(_(" -n, --no-act              do everything except write to device\n"), out);
+	fputs(_("     --no-device-names     do not print device names in dump output\n"), out);
 	fputs(_("     --no-reread           do not check whether the device is in use\n"), out);
 	fputs(_("     --no-tell-kernel      do not tell kernel about changes\n"), out);
 	fputs(_(" -O, --backup-file <path>  override default backup file name\n"), out);
@@ -2244,7 +2249,8 @@ int main(int argc, char *argv[])
 		OPT_NOTELL,
 		OPT_RELOCATE,
 		OPT_LOCK,
-		OPT_SECTORSIZE
+		OPT_SECTORSIZE,
+		OPT_NO_DEVICE_NAMES
 	};
 
 	static const struct option longopts[] = {
@@ -2267,6 +2273,7 @@ int main(int argc, char *argv[])
 		{ "list-free", no_argument,     NULL, 'F' },
 		{ "list-types", no_argument,	NULL, 'T' },
 		{ "no-act",  no_argument,       NULL, 'n' },
+		{ "no-device-names", no_argument,     NULL, OPT_NO_DEVICE_NAMES },
 		{ "no-reread", no_argument,     NULL, OPT_NOREREAD },
 		{ "no-tell-kernel", no_argument, NULL, OPT_NOTELL },
 		{ "move-data", optional_argument, NULL, OPT_MOVEDATA },
@@ -2463,6 +2470,9 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_DELETE:
 			sf->act = ACT_DELETE;
+			break;
+		case OPT_NO_DEVICE_NAMES:
+			sf->no_device_names = 1;
 			break;
 		case OPT_NOTELL:
 			sf->notell = 1;
