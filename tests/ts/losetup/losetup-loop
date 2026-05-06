@@ -217,8 +217,8 @@ else
 	$TS_CMD_LOSETUP -d "$LODEV"
 	$TS_CMD_LOSETUP -d "$LODEVR" >/dev/null 2>&1
 	ts_log "Success"
-	ts_finalize_subtest
 fi
+ts_finalize_subtest
 
 udevadm settle
 
@@ -238,8 +238,8 @@ else
 	$TS_CMD_LOSETUP -d "$LODEV"
 	$TS_CMD_LOSETUP -d "$LODEVR" >/dev/null 2>&1
 	ts_log "Success"
-	ts_finalize_subtest
 fi
+ts_finalize_subtest
 
 udevadm settle
 

@@ -87,12 +87,12 @@ EOF
 		$TS_CMD_UMOUNT "$mountpoint"
 		unset LIBMOUNT_UTAB
 		rm -f $MOUNTER
-		ts_finalize_subtest
 	else
 		ts_skip_subtest "tmpfs not mounted"
 	fi
 else
 	ts_skip_subtest "tmpfs unsupported"
 fi
+ts_finalize_subtest
 
 ts_finalize

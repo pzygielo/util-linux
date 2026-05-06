@@ -93,8 +93,8 @@ else
 	$TS_CMD_UMOUNT "$TS_MOUNTPOINT" >> "$TS_OUTPUT" 2>> "$TS_ERRLOG"
 	udevadm settle
 	ts_log "Success"
-	ts_finalize_subtest
 fi
+ts_finalize_subtest
 
 ts_init_subtest "reuse"
 [ -d "$TS_MOUNTPOINT" ] || mkdir -p $TS_MOUNTPOINT

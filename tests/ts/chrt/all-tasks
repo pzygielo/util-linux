@@ -93,9 +93,8 @@ else
     else
         echo "retrieved real-time scheduling attributes for all tasks" >"$TS_OUTPUT"
     fi
-
-    ts_finalize_subtest
 fi
+ts_finalize_subtest
 
 
 ts_init_subtest "set-attributes"
@@ -133,9 +132,8 @@ else
     else
         echo "set real-time scheduling attributes for all tasks" >>"$TS_OUTPUT"
     fi
-
-    ts_finalize_subtest
 fi
+ts_finalize_subtest
 
 
 ts_finalize

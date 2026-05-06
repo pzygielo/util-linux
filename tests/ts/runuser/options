@@ -39,9 +39,8 @@ unset -v UL_TEST_VAR
 
 if grep "$($TS_HELPER_STRERROR ENOTTY)" "$TS_ERRLOG"; then
     ts_skip_subtest "failed to launch login session: ENOTTY"
-else
-    ts_finalize_subtest
 fi
+ts_finalize_subtest
 
 
 ts_init_subtest "preserve-environment"
@@ -101,8 +100,7 @@ ps --version >/dev/null
 if ! compare_ptys; then
     ts_skip_subtest "$errmsg"
     unset -v errmsg
-else
-    ts_finalize_subtest
 fi
+ts_finalize_subtest
 
 ts_finalize
