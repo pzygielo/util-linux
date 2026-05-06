@@ -73,5 +73,6 @@ ts_finalize_subtest
 ts_init_subtest "options-no-multi"
 $TS_CMD_FINDMNT --filter 'OPTIONS =~ "\<nosuid\>" && OPTIONS =~ "\<nodev\>" && OPTIONS =~ "\<blkio\>"' --kernel --tab-file "$TS_SELF/files/mountinfo" &> "$TS_OUTPUT"
 echo rc=$? >> "$TS_OUTPUT"
+ts_finalize_subtest
 
 ts_finalize

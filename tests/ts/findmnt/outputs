@@ -126,8 +126,8 @@ else
     # This should not return anything
     $TS_CMD_FINDMNT --output TARGET --nocanonicalize "$TEST_LINK" >>"$TS_OUTPUT" 2>>"$TS_ERRLOG"
     rm -f "$TEST_LINK"
-    ts_finalize_subtest
 fi
+ts_finalize_subtest
 
 ts_init_subtest "default"
 $TS_CMD_FINDMNT --tab-file "$TS_SELF/files/mountinfo" &> "$TS_OUTPUT"
