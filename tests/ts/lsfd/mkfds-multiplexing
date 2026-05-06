@@ -38,6 +38,7 @@ for multiplexer in pselect6 select poll ppoll; do
     ts_init_subtest "${multiplexer}"
     if ! "$TS_HELPER_MKFDS" -W | grep -q "^$multiplexer\$"; then
 	ts_skip_subtest "the multiplexer ${multiplexer} is not available"
+	ts_finalize_subtest
 	continue
     fi
 
@@ -52,6 +53,7 @@ for multiplexer in pselect6 select poll ppoll; do
 	    kill -CONT "${PID}"
 	    wait "${MKFDS_PID}"
 	    ts_skip_subtest "cannot open /proc/${PID}/syscall"
+	    ts_finalize_subtest
 	    continue
 	fi
 	syscall_n=$(cut -f1 -d' ' <<< "$syscall_line")
@@ -61,6 +63,7 @@ for multiplexer in pselect6 select poll ppoll; do
 	    kill -CONT "${PID}"
 	    wait "${MKFDS_PID}"
 	    ts_skip_subtest "incorrect syscall number in /proc/${PID}/syscall"
+	    ts_finalize_subtest
 	    continue
 	fi
 

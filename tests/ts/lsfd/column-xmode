@@ -151,6 +151,7 @@ for m in flock-sh posix-r- ofd-r-; do
     RC=$?
     if [ "$RC" == "$TS_EXIT_NOTSUPP" ]; then
 	ts_skip_subtest	"$m lock is not available"
+	ts_finalize_subtest
 	continue
     fi
     ts_finalize_subtest
@@ -187,6 +188,7 @@ for m in flock-ex posix--w posix-rw  ofd--w ofd-rw lease-w; do
     RC=$?
     if [ "$RC" == "$TS_EXIT_NOTSUPP" ]; then
 	ts_skip_subtest	"$m lock is not available"
+	ts_finalize_subtest
 	continue
     fi
     ts_finalize_subtest
