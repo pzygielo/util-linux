@@ -28,7 +28,7 @@ ts_skip_nonroot
 ts_check_losetup
 ts_check_prog "mkfs.ext2"
 
-> "$TS_OUTPUT"
+: > "$TS_OUTPUT"
 
 ts_device_init
 DEVICE=$TS_LODEV

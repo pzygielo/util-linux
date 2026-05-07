@@ -28,7 +28,7 @@ NLOOPS=1000
 NPROCESSES=50
 
 
-> "$TS_OUTPUT".debug
+: > "$TS_OUTPUT".debug
 echo 0 > "$TS_OUTPUT"
 SYNCTIME=$(( $(date +%s) + 5 ))
 
