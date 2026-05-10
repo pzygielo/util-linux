@@ -1102,7 +1102,7 @@ Set the umask (the bit mask of the permissions that are *not* present). The defa
 Convert all files names to lowercase, or leave them. (Default: *case=lower*.)
 
 **conv=**__mode__::
-This option is obsolete and may fail or being ignored.
+This option is obsolete and may fail or be ignored.
 
 *nocheck*::
 Do not abort mounting when certain consistency checks fail.
@@ -1140,7 +1140,7 @@ Also show hidden and associated files. (If the ordinary files and the associated
 Set the block size to the indicated value. (Default: *block=1024*.)
 
 **conv=**__mode__::
-This option is obsolete and may fail or being ignored.
+This option is obsolete and may fail or be ignored.
 
 *cruft*::
 If the high byte of the file length contains other garbage, set this mount option to ignore the high order bits of the file length. This implies that a file cannot be larger than 16 MB.
