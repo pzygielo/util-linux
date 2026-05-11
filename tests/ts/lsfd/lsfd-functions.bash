@@ -203,7 +203,7 @@ function lsfd_check_udp_lite
 	    0)
 		return;;
 	    "$EPROTONOSUPPORT")
-		ts_skip "no UDP-Lite available (IPv$ip)";;
+		ts_skip "no UDP-Lite available (IPv$1)";;
 	    *)
 		ts_failed "failed to use a IPPROTO_UDPLITE protocol: $msg [$err]";;
 	esac
