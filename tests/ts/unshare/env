@@ -31,9 +31,8 @@ unset -v UL_TEST_ENV
 
 if grep -q "$($TS_HELPER_STRERROR EPERM)" "$TS_OUTPUT" "$TS_ERRLOG"; then
         ts_skip_subtest "missing permissions"
-else
-        ts_finalize_subtest
 fi
+ts_finalize_subtest
 
 
 ts_init_subtest "whitelist-env"
@@ -43,8 +42,7 @@ export UL_TEST_ENV2=bar
 
 if grep -q "$($TS_HELPER_STRERROR EPERM)" "$TS_OUTPUT" "$TS_ERRLOG"; then
         ts_skip_subtest "missing permissions"
-else
-        ts_finalize_subtest
 fi
+ts_finalize_subtest
 
 ts_finalize

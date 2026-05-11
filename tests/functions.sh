@@ -193,6 +193,9 @@ function ts_runs_on_qemu {
 function ts_failed_subtest {
 	local msg="FAILED"
 	local ret=1
+
+	TS_SUBFAILED="yes"
+
 	if [ "$TS_KNOWN_FAIL" = "yes" ]; then
 		msg="KNOWN FAILED"
 		ret=0
@@ -458,7 +461,13 @@ function ts_init_env {
 
 function ts_init_subtest {
 
+	if [ -n "$TS_SUBNAME" ]; then
+		ts_failed "BUG: subtest '$TS_SUBNAME' not finalized"
+	fi
+
 	TS_SUBNAME="$1"
+	TS_SUBFAILED=""
+	TS_SUBSKIPPED=""
 	ts_init_core_subtest_env
 	TS_NSUBTESTS=$(( $TS_NSUBTESTS + 1 ))
 
@@ -632,12 +641,18 @@ function tt_gen_mem_report {
 function ts_finalize_subtest {
 	local res=0
 
-	ts_gen_diff
-	if [ $? -eq 1 ]; then
-		ts_failed_subtest "$1"
+	if [ "$TS_SUBSKIPPED" = "yes" ]; then
+		:
+	elif [ "$TS_SUBFAILED" = "yes" ]; then
 		res=1
 	else
-		ts_report_ok "$(tt_gen_mem_report "$1")"
+		ts_gen_diff
+		if [ $? -eq 1 ]; then
+			ts_failed_subtest "$1"
+			res=1
+		else
+			ts_report_ok "$(tt_gen_mem_report "$1")"
+		fi
 	fi
 
 	[ $res -ne 0 ] && TS_NSUBFAILED=$(( $TS_NSUBFAILED + 1 ))
@@ -649,10 +664,8 @@ function ts_finalize_subtest {
 }
 
 function ts_skip_subtest {
+	TS_SUBSKIPPED="yes"
 	ts_report_skip "$1"
-	# reset environment back to parental test
-	ts_init_core_env
-
 }
 
 # Specify the kernel version X.Y.Z you wish to compare against like:
@@ -678,6 +691,10 @@ function ts_kernel_ver_lt {
 
 function ts_finalize {
 	ts_cleanup_on_exit
+
+	if [ -n "$TS_SUBNAME" ]; then
+		ts_failed "BUG: subtest '$TS_SUBNAME' not finalized"
+	fi
 
 	if [ $TS_NSUBTESTS -ne 0 ]; then
 		if ! ts_gen_diff || [ $TS_NSUBFAILED -ne 0 ]; then

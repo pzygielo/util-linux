@@ -67,11 +67,10 @@ if id $uid &>/dev/null; then
 			--inh-caps=-all --reset-env \
 			-- $TESTPROG ${BASE}/root-sym/foo \
 		| sed "s:${BASE}::g" >> "$TS_OUTPUT" 2>> "$TS_ERRLOG"
-
-	ts_finalize_subtest
 else
 	ts_skip_subtest "nobody user is missing"
 fi
+ts_finalize_subtest
 
 
 # cleanup

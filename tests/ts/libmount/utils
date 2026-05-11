@@ -55,18 +55,18 @@ ts_finalize_subtest
 ts_init_subtest "mountpoint"
 if [ -d /proc ]; then
 	ts_run $TESTPROG --mountpoint /proc &> "$TS_OUTPUT"
-	ts_finalize_subtest
 else
 	ts_skip_subtest "no /proc"
 fi
+ts_finalize_subtest
 
 ts_init_subtest "mountpoint-subdir"
 if [ -d /proc/sys/kernel ]; then
 	ts_run $TESTPROG --mountpoint /proc/sys/kernel &> "$TS_OUTPUT"
-	ts_finalize_subtest
 else
 	ts_skip_subtest "no /proc"
 fi
+ts_finalize_subtest
 
 ts_init_subtest "mountpoint-root"
 ts_run $TESTPROG --mountpoint / &> "$TS_OUTPUT"
