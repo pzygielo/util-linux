@@ -30,7 +30,7 @@
 #include "xalloc.h"
 
 static void parse_mask_or_list(const char *cmdline_arg,
-		cpu_set_t *all_bits, size_t width)
+		cpu_set_t *all_bits, size_t width, int fail_width)
 {
 	cpu_set_t *bits, *copy;
 	char bitwise_op = '|';
@@ -63,8 +63,11 @@ static void parse_mask_or_list(const char *cmdline_arg,
 		if (cpumask_parse(arg, bits, size) < 0)
 			errx(EXIT_FAILURE, _("error: invalid bit mask: %s"), cmdline_arg);
 	} else {
-		if (cpulist_parse(arg, bits, size, 1) < 0)
+		int rc = cpulist_parse(arg, bits, size, fail_width);
+		if (rc == 1)
 			errx(EXIT_FAILURE, _("error: invalid bit list: %s"), cmdline_arg);
+		else if (rc == 2)
+			errx(EXIT_FAILURE, _("error: bit list wider than cpuset size: %s"), cmdline_arg);
 	}
 
 	/* truncate all bits beyond the requested mask size */
@@ -228,6 +231,8 @@ static void __attribute__((__noreturn__)) usage(void)
 	fputsln(_(" -w <num>, --width <num>\n"
 	          "                     maximum width of bit masks (default 8192)"),
 		stdout);
+	fputsln(_(" -f, --fail-width     fail if bit list contains values wider than width"),
+		stdout);
 
 	fputs(_("\nOutput modes:\n"), stdout);
 	fputsln(_(" -m, --mask          display bits as a hex mask value (default)"),
@@ -251,9 +256,10 @@ int main(int argc, char **argv)
 	cpu_set_t *bits = NULL;
 	size_t width = 8192;
 	size_t alloc_size;
+	int fail_width = 0;
 	int c;
 
-#define FLAGS "Vhw:mgble"
+#define FLAGS "Vhw:mgblef"
 	static const struct option longopts[] = {
 		{ "version",      no_argument,       NULL, 'V' },
 		{ "help",         no_argument,       NULL, 'h' },
@@ -263,6 +269,7 @@ int main(int argc, char **argv)
 		{ "binary",       no_argument,       NULL, 'b' },
 		{ "expand",       no_argument,       NULL, 'e' },
 		{ "list",         no_argument,       NULL, 'l' },
+		{ "fail-width",   no_argument,       NULL, 'f' },
 		{ NULL,           0,                 NULL,  0  }
 	};
 
@@ -294,6 +301,9 @@ int main(int argc, char **argv)
 				10, _("invalid --width"), 128 * 1024);
 			if (width == 0)
 				errx(EXIT_FAILURE, _("invalid --width"));
+			break;
+		case 'f':
+			fail_width = 1;
 			break;
 		case 'V':
 			print_version(EXIT_SUCCESS);
@@ -331,7 +341,7 @@ int main(int argc, char **argv)
 	memset(bits, 0, alloc_size);
 
 	for (; argc > 0; argc--, argv++)
-		parse_mask_or_list(*argv, bits, width);
+		parse_mask_or_list(*argv, bits, width, fail_width);
 
 	ul_strv_free(stdin_lines);
 

@@ -26,7 +26,7 @@ bits - convert bit masks or lists from/to various formats
 
 == SYNOPSIS
 
-*bits* [*-h*] [*-V*] [*-w* _number_] [_mode_] [_mask_|_list_]...
+*bits* [*-h*] [*-V*] [*-w* _number_] [*-f*] [_mode_] [_mask_|_list_]...
 
 == DESCRIPTION
 
@@ -75,7 +75,12 @@ groups so far.
 
 *-w* _number_, *--width* _number_::
 The maximum number of bits in the masks handled by *bits*.
-The default is *8192*. Any bit larger than this number will be truncated.
+The default is *8192*. Any bit larger than this number will be truncated
+unless *--fail-width* is specified.
+
+*-f*, *--fail-width*::
+Fail with an error if the bit list contains values larger than the
+*--width* limit. By default, such values are silently ignored.
 
 include::man-common/help-version.adoc[]
 
