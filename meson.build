@@ -176,10 +176,6 @@ headers = '''
         ncursesw/term.h
         ncurses.h
         term.h
-        slang.h
-        slang/slang.h
-        slcurses.h
-        slang/slcurses.h
 '''.split()
 
 foreach header : headers
@@ -321,6 +317,12 @@ lib_slang = dependency(
   'slang',
   required : get_option('slang'))
 conf.set('HAVE_SLANG', lib_slang.found() ? 1 : false)
+if lib_slang.found()
+  foreach h : ['slang.h', 'slang/slang.h', 'slcurses.h', 'slang/slcurses.h']
+    have = cc.has_header(h)
+    conf.set('HAVE_' + h.underscorify().to_upper(), have ? 1 : false)
+  endforeach
+endif
 
 foreach curses_libs : [lib_slang, lib_ncursesw, lib_ncurses]
   if curses_libs.found()
@@ -1069,7 +1071,7 @@ exe = executable(
   chfn_sources,
   chfn_chsh_sources,
   include_directories : includes,
-  link_with : [lib_common, logindefs_c],
+  link_with : [lib_common, lib_common_logindefs],
   dependencies : chfn_chsh_deps,
   install_dir : usrbin_exec_dir,
   install_mode : 'rwsr-xr-x',
@@ -1079,10 +1081,9 @@ exe = executable(
 exe2 = executable(
   'chsh',
   'login-utils/chsh.c',
-  'lib/shells.c',
   chfn_chsh_sources,
   include_directories : includes,
-  link_with : lib_common,
+  link_with : [lib_common, lib_common_shells],
   dependencies : chfn_chsh_deps,
   install_dir : usrbin_exec_dir,
   install_mode : 'rwsr-xr-x',
@@ -1170,11 +1171,10 @@ exe = executable(
   'login-utils/su.c',
   'login-utils/su-common.c',
   'login-utils/su-common.h',
-  'lib/shells.c',
   pty_session_c,
   monotonic_c,
   include_directories : includes,
-  link_with : [lib_common, logindefs_c],
+  link_with : [lib_common, lib_common_logindefs, lib_common_shells],
   dependencies : [lib_pam,
                   lib_pam_misc,
                   lib_util,
@@ -1214,7 +1214,7 @@ exe = executable(
   include_directories : includes,
   link_with : [lib_common,
                lib_smartcols,
-               logindefs_c] +
+               lib_common_logindefs] +
                (build_liblastlog2 ? [lib_lastlog2] : []),
   dependencies : [lib_selinux,
                   lib_systemd],
@@ -1257,11 +1257,10 @@ exe = executable(
   'login-utils/runuser.c',
   'login-utils/su-common.c',
   'login-utils/su-common.h',
-  'lib/shells.c',
   pty_session_c,
   monotonic_c,
   include_directories : includes,
-  link_with : [lib_common, logindefs_c],
+  link_with : [lib_common, lib_common_logindefs, lib_common_shells],
   dependencies : [lib_pam,
                   lib_pam_misc,
                   lib_util,
@@ -2213,7 +2212,7 @@ exe = executable(
   'setpriv',
   setpriv_sources,
   include_directories : includes,
-  link_with : [lib_common, logindefs_c],
+  link_with : [lib_common, lib_common_logindefs],
   dependencies : [lib_cap_ng],
   install_dir : usrbin_exec_dir,
   install : opt,
@@ -2751,7 +2750,7 @@ exe = executable(
   'agetty',
   agetty_sources,
   include_directories : includes,
-  link_with : [lib_common, logindefs_c],
+  link_with : [lib_common, lib_common_logindefs],
   dependencies : [BSD ? lib_util : [], lib_systemd],
   install_dir : sbindir,
   install : opt,
@@ -2846,7 +2845,7 @@ exe = executable(
   'login',
   login_sources,
   include_directories : includes,
-  link_with : [lib_common, logindefs_c],
+  link_with : [lib_common, lib_common_logindefs, lib_common_shells],
   dependencies : [lib_pam,
                   lib_audit,
                   lib_selinux],
@@ -3744,7 +3743,7 @@ exe = executable(
   'lib/logindefs.c',
   c_args : ['-DTEST_PROGRAM'],
   include_directories : dir_include,
-  link_with : [lib_common, logindefs_c],
+  link_with : [lib_common, lib_common_logindefs],
   build_by_default: program_tests)
 if not is_disabler(exe)
   exes += exe

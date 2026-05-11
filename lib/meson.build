@@ -8,6 +8,7 @@ lib_common_sources = '''
 	crc64.c
 	c_strtod.c
 	debug.c
+	default_shell.c
 	encode.c
 	env.c
 	fileutils.c
@@ -19,7 +20,6 @@ lib_common_sources = '''
 	pidutils.c
 	pwdutils.c
 	sha256.c
-	shells.c
 	signames.c
 	timeutils.c
 	ttyutils.c
@@ -51,11 +51,18 @@ pty_session_c = files('pty-session.c')
 ismounted_c = files('ismounted.c')
 exec_shell_c = files('exec_shell.c')
 fileeq_c = files('fileeq.c')
-logindefs_c = static_library('logindefs',
+lib_common_logindefs = static_library('common_logindefs',
   sources : ['logindefs.c'],
   include_directories : dir_include,
   dependencies : lib_econf,
 )
+
+lib_common_shells = static_library('common_shells',
+  sources : ['shells.c'],
+  include_directories : dir_include,
+  dependencies : lib_econf,
+)
+
 selinux_utils_c = files('selinux-utils.c')
 
 caputils_c = files('caputils.c')
