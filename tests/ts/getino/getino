@@ -64,6 +64,8 @@ if [ -n "$res" ]; then
 fi
 ts_finalize_subtest
 
+$TS_CMD_UNSHARE --ipc true &> /dev/null || ts_skip "no namespace support"
+
 ts_init_subtest "ipcns"
 ts_ipc_ns=$("$TS_CMD_GETINO" --ipcns $$ 2>>"$TS_ERRLOG")
 unshare_ipc_ns=$("$TS_CMD_UNSHARE" --ipc bash -c "$TS_CMD_GETINO --ipcns \$\$" 2>>"$TS_ERRLOG")
