@@ -596,9 +596,9 @@ int main(int argc, char **argv)
 	if (ctl->priority < sched_get_priority_min(ctl->policy) ||
 			sched_get_priority_max(ctl->policy) < ctl->priority)
 		errx(EXIT_FAILURE,
-		_("unsupported priority value '%d' for the %s policy\n"
-			"use 'chrt --max' to list valid ranges"),
-			ctl->priority, get_policy_name(ctl->policy));
+		     _("unsupported priority value %d for the %s policy"
+		       " (see --max for valid range)"),
+		     ctl->priority, get_policy_name(ctl->policy));
 	set_sched(ctl);
 
 	if (ctl->verbose)
