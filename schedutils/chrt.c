@@ -93,6 +93,7 @@ static void __attribute__((__noreturn__)) usage(void)
 	fputs(_("Scheduling options:\n"), out);
 	fputs(_(" -R, --reset-on-fork       set reset-on-fork flag\n"), out);
 	fputs(_(" -G, --reclaim-grub        set SCHED_FLAG_RECLAIM\n"), out);
+	fputs(_(" -O, --deadline-overrun    set SCHED_FLAG_DL_OVERRUN\n"), out);
 	fputs(_(" -T, --sched-runtime <ns>  runtime parameter for DEADLINE\n"), out);
 	fputs(_(" -P, --sched-period <ns>   period parameter for DEADLINE\n"), out);
 	fputs(_(" -D, --sched-deadline <ns> deadline parameter for DEADLINE\n"), out);
@@ -440,6 +441,7 @@ int main(int argc, char **argv)
 		{ "all-tasks",  no_argument, NULL, 'a' },
 		{ "batch",	no_argument, NULL, 'b' },
 		{ "deadline",   no_argument, NULL, 'd' },
+		{ "deadline-overrun", no_argument, NULL, 'O' },
 		{ "ext",	no_argument, NULL, 'e' },
 		{ "fifo",	no_argument, NULL, 'f' },
 		{ "idle",	no_argument, NULL, 'i' },
@@ -463,7 +465,7 @@ int main(int argc, char **argv)
 	textdomain(PACKAGE);
 	close_stdout_atexit();
 
-	while((c = getopt_long(argc, argv, "+abdD:efiphmoP:T:rRGvV", longopts, NULL)) != -1)
+	while((c = getopt_long(argc, argv, "+abdD:efiphmoOP:T:rRGvV", longopts, NULL)) != -1)
 	{
 		switch (c) {
 		case 'a':
@@ -499,6 +501,11 @@ int main(int argc, char **argv)
 		case 'G':
 #ifdef SCHED_FLAG_RECLAIM
 			ctl->sched_flags |= SCHED_FLAG_RECLAIM;
+#endif
+			break;
+		case 'O':
+#ifdef SCHED_FLAG_DL_OVERRUN
+			ctl->sched_flags |= SCHED_FLAG_DL_OVERRUN;
 #endif
 			break;
 		case 'i':
@@ -596,6 +603,14 @@ int main(int argc, char **argv)
 #  endif
 	if ((ctl->sched_flags & SCHED_FLAG_RECLAIM) && ctl->policy != SCHED_DEADLINE)
 		errx(EXIT_FAILURE, _("--reclaim-grub is only supported for SCHED_DEADLINE"));
+# endif
+# ifdef SCHED_FLAG_DL_OVERRUN
+#  ifndef HAVE_SCHED_SETATTR
+	if (ctl->sched_flags & SCHED_FLAG_DL_OVERRUN)
+		errx(EXIT_FAILURE, _("SCHED_FLAG_DL_OVERRUN is unsupported"));
+#  endif
+	if ((ctl->sched_flags & SCHED_FLAG_DL_OVERRUN) && ctl->policy != SCHED_DEADLINE)
+		errx(EXIT_FAILURE, _("--deadline-overrun is only supported for SCHED_DEADLINE"));
 # endif
 	if (ctl->policy == SCHED_DEADLINE) {
 		/* The basic rule is runtime <= deadline <= period, so we can

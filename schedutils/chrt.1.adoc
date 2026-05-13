@@ -85,6 +85,9 @@ Specifies deadline parameter for *SCHED_DEADLINE* policy (Linux-specific).
 *-G*, *--reclaim-grub*::
 Enables GRUB (Greedy Reclamation of Unused Bandwidth) algorithm. Linux-specific, supported since 4.13.
 
+*-O*, *--deadline-overrun*::
+Set *SCHED_FLAG_DL_OVERRUN* to receive *SIGXCPU* when a *SCHED_DEADLINE* task exceeds its runtime budget within a period. Without this flag the task is silently throttled until the next period. Linux-specific, supported since 4.16.
+
 *-R*, *--reset-on-fork*::
 Use *SCHED_RESET_ON_FORK* or *SCHED_FLAG_RESET_ON_FORK* flag. Linux-specific, supported since 2.6.31.
 +
