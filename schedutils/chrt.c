@@ -221,7 +221,9 @@ static void show_sched_pid_info(struct chrt_ctl *ctl, pid_t pid)
 
 		policy = sa.sched_policy;
 		prio = sa.sched_priority;
+# ifdef SCHED_FLAG_RESET_ON_FORK
 		reset_on_fork = sa.sched_flags & SCHED_FLAG_RESET_ON_FORK;
+# endif
 		runtime = sa.sched_runtime;
 #ifdef SCHED_DEADLINE
 		deadline = sa.sched_deadline;
