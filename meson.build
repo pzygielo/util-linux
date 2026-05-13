@@ -253,7 +253,9 @@ summary('libsmartcols', build_libsmartcols ? 'enabled' : 'disabled', section : '
 build_libfdisk = get_option('build-libfdisk').require(get_option('build-libblkid').allowed()).allowed()
 summary('libfdisk', build_libfdisk ? 'enabled' : 'disabled', section : 'components')
 
-build_uuidd = get_option('build-uuidd').allowed()
+build_uuidd = get_option('build-uuidd') \
+              .require(conf.get('HAVE_SYS_SIGNALFD_H').to_string() == '1') \
+              .allowed()
 conf.set('HAVE_UUIDD', build_uuidd ? 1 : false)
 summary('uuidd', build_uuidd ? 'enabled' : 'disabled', section : 'components')
 
@@ -621,6 +623,7 @@ funcs = '''
         __fpurge
         fpurge
         __fpending
+        sched_getscheduler
         secure_getenv
         __secure_getenv
         eaccess
@@ -1916,6 +1919,9 @@ if opt and not is_disabler(exe)
   bashcompletions += ['zramctl']
 endif
 
+opt = get_option('build-prlimit') \
+      .require(conf.get('HAVE_PRLIMIT').to_string() == '1') \
+      .allowed()
 exe = executable(
   'prlimit',
   prlimit_sources,
@@ -1923,8 +1929,9 @@ exe = executable(
   link_with : [lib_common,
                lib_smartcols],
   install_dir : usrbin_exec_dir,
-  install : true)
-if not is_disabler(exe)
+  install : opt,
+  build_by_default : opt)
+if opt and not is_disabler(exe)
   exes += exe
   manadocs += prlimit_manadocs
   bashcompletions += ['prlimit']
@@ -2069,14 +2076,18 @@ if opt and not is_disabler(exe)
   bashcompletions += ['chcpu']
 endif
 
+opt = get_option('build-wdctl') \
+      .require(conf.get('HAVE_LINUX_WATCHDOG_H').to_string() == '1') \
+      .allowed()
 exe = executable(
   'wdctl',
   wdctl_sources,
   include_directories : includes,
   link_with : [lib_common,
                lib_smartcols],
-  install : true)
-if not is_disabler(exe)
+  install : opt,
+  build_by_default : opt)
+if opt and not is_disabler(exe)
   exes += exe
   manadocs += wdctl_manadocs
   bashcompletions += ['wdctl']
@@ -2129,10 +2140,10 @@ if opt and not is_disabler(exe)
   bashcompletions += ['pivot_root']
 endif
 
-opt = get_option('build-switch_root').allowed()
-if opt and not have_dirfd and not have_ddfd
-  error('neither dirfd nor ddfd are available')
-endif
+opt = get_option('build-switch_root') \
+      .require(have_dirfd or have_ddfd) \
+      .require(conf.get('HAVE_SYS_STATFS_H').to_string() == '1') \
+      .allowed()
 exe = executable(
   'switch_root',
   switch_root_sources,
@@ -2175,7 +2186,9 @@ if opt and not is_disabler(exe)
   exes += exe
 endif
 
-opt = get_option('build-nsenter').allowed()
+opt = get_option('build-nsenter') \
+      .require(conf.get('HAVE_SYS_STATFS_H').to_string() == '1') \
+      .allowed()
 exe = executable(
   'nsenter',
   nsenter_sources,
@@ -2745,7 +2758,9 @@ if opt and not is_disabler(exe)
   bashcompletions += ['scriptreplay']
 endif
 
-opt = get_option('build-agetty').allowed()
+opt = get_option('build-agetty') \
+      .require(cc.has_header_symbol('paths.h', '_PATH_UTMP')) \
+      .allowed()
 exe = executable(
   'agetty',
   agetty_sources,
@@ -2820,7 +2835,9 @@ endif
 # chgrp tty $(DESTDIR)$(usrbin_execdir)/wall
 # chmod g+s $(DESTDIR)$(usrbin_execdir)/wall
 
-opt = get_option('build-write').allowed()
+opt = get_option('build-write') \
+      .require(cc.has_header_symbol('paths.h', '_PATH_UTMP')) \
+      .allowed()
 exe = executable(
   'write',
   write_sources,
@@ -2856,7 +2873,9 @@ if opt and not is_disabler(exe)
   manadocs += login_manadocs
 endif
 
-opt = get_option('build-sulogin').allowed()
+opt = get_option('build-sulogin') \
+      .require(conf.get('HAVE_SHADOW_H').to_string() == '1') \
+      .allowed()
 exe = executable(
   'sulogin',
   sulogin_sources,
@@ -3289,6 +3308,9 @@ if opt and not is_disabler(exe)
   bashcompletions += ['getopt']
 endif
 
+opt = get_option('build-fincore') \
+      .require(LINUX) \
+      .allowed()
 exe = executable(
   'fincore',
   fincore_sources,
@@ -3296,8 +3318,9 @@ exe = executable(
   link_with : [lib_common,
                lib_smartcols],
   install_dir : usrbin_exec_dir,
-  install : true)
-if not is_disabler(exe)
+  install : opt,
+  build_by_default : opt)
+if opt and not is_disabler(exe)
   exes += exe
   manadocs += fincore_manadocs
   bashcompletions += ['fincore']
@@ -3318,7 +3341,9 @@ if opt and not is_disabler(exe)
   bashcompletions += ['hardlink']
 endif
 
-opt = get_option('build-pipesz').allowed()
+opt = get_option('build-pipesz') \
+      .require(cc.has_header_symbol('fcntl.h', 'F_GETPIPE_SZ')) \
+      .allowed()
 exe = executable(
   'pipesz',
   pipesz_sources,
@@ -3453,7 +3478,11 @@ endif
 
 ############################################################
 
-opt = get_option('build-schedutils').allowed()
+opt = get_option('build-schedutils') \
+      .require(conf.get('HAVE_SCHED_GETSCHEDULER').to_string() == '1') \
+      .require(conf.get('HAVE_SYS_PRCTL_H').to_string() == '1') \
+      .require(conf.get('HAVE_CPU_SET_T').to_string() == '1') \
+      .allowed()
 exe = executable(
   'chrt',
   'schedutils/chrt.c',
