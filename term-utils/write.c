@@ -145,24 +145,22 @@ static int check_utmp(const struct write_control *ctl)
 	if (sd_booted() > 0) {
 		char **sessions_list;
 		int sessions = sd_get_sessions(&sessions_list);
+
 		if (sessions < 0)
-			errx(EXIT_FAILURE, _("error getting sessions: %s"),
-				strerror(-sessions));
+			goto utmp;
 
 		for (int i = 0; i < sessions; i++) {
-
 			char *name, *tty;
-			int r;
 
-			if ((r = sd_session_get_username(sessions_list[i], &name)) < 0)
-				errx(EXIT_FAILURE, _("get user name failed: %s"), strerror (-r));
+			if (sd_session_get_username(sessions_list[i], &name) < 0)
+				continue;
 			if (sd_session_get_tty(sessions_list[i], &tty) < 0) {
 				free(name);
 				continue;
 			}
 
-			if  (strcmp(ctl->dst_login, name) == 0 &&
-					strcmp(ctl->dst_tty_name, tty) == 0) {
+			if (strcmp(ctl->dst_login, name) == 0 &&
+			    strcmp(ctl->dst_tty_name, tty) == 0) {
 				free(name);
 				free(tty);
 				res = 0;
@@ -174,23 +172,30 @@ static int check_utmp(const struct write_control *ctl)
 		for (int i = 0; i < sessions; i++)
 			free(sessions_list[i]);
 		free(sessions_list);
-	} else {
-#endif
-		utmpxname(_PATH_UTMP);
-		setutxent();
 
-		while ((u = getutxent())) {
-			if (strncmp(ctl->dst_login, u->ut_user, sizeof(u->ut_user)) == 0 &&
-		    		strncmp(ctl->dst_tty_name, u->ut_line, sizeof(u->ut_line)) == 0) {
-				res = 0;
-				break;
-			}
-		}
-
-		endutxent();
-#if defined(USE_SYSTEMD) && HAVE_DECL_SD_SESSION_GET_USERNAME == 1
+		if (res == 0)
+			return res;
 	}
+utmp:
 #endif
+	utmpxname(_PATH_UTMP);
+	setutxent();
+
+	while ((u = getutxent())) {
+		char user[sizeof(u->ut_user) + 1];
+		char line[sizeof(u->ut_line) + 1];
+
+		mem2strcpy(user, u->ut_user, sizeof(u->ut_user), sizeof(user));
+		mem2strcpy(line, u->ut_line, sizeof(u->ut_line), sizeof(line));
+
+		if (strcmp(ctl->dst_login, user) == 0 &&
+		    strcmp(ctl->dst_tty_name, line) == 0) {
+			res = 0;
+			break;
+		}
+	}
+
+	endutxent();
 	return res;
 }
 
@@ -216,22 +221,19 @@ static void search_utmp(struct write_control *ctl)
 		char path[256];
 		char **sessions_list;
 		int sessions = sd_get_sessions(&sessions_list);
+
 		if (sessions < 0)
-			errx(EXIT_FAILURE, _("error getting sessions: %s"),
-			     strerror(-sessions));
+			goto utmp;
 
 		for (int i = 0; i < sessions; i++) {
 			char *name, *tty;
-			int r;
 
-			if ((r = sd_session_get_username(sessions_list[i], &name)) < 0)
-				errx(EXIT_FAILURE, _("get user name failed: %s"), strerror (-r));
-
-			if  (strcmp(ctl->dst_login, name) != 0) {
+			if (sd_session_get_username(sessions_list[i], &name) < 0)
+				continue;
+			if (strcmp(ctl->dst_login, name) != 0) {
 				free(name);
 				continue;
 			}
-
 			if (sd_session_get_tty(sessions_list[i], &tty) < 0) {
 				free(name);
 				continue;
@@ -271,26 +273,32 @@ static void search_utmp(struct write_control *ctl)
 		for (int i = 0; i < sessions; i++)
 			free(sessions_list[i]);
 		free(sessions_list);
-	} else
+	}
+utmp:
 #endif
 	{
+		char user[sizeof(u->ut_user) + 1];
+		char line[sizeof(u->ut_line) + 1];
 		char path[sizeof(u->ut_line) + 6];
 
 		utmpxname(_PATH_UTMP);
 		setutxent();
 
 		while ((u = getutxent())) {
-			if (strncmp(ctl->dst_login, u->ut_user, sizeof(u->ut_user)) != 0)
+			mem2strcpy(user, u->ut_user, sizeof(u->ut_user), sizeof(user));
+			mem2strcpy(line, u->ut_line, sizeof(u->ut_line), sizeof(line));
+
+			if (strcmp(ctl->dst_login, user) != 0)
 				continue;
 			num_ttys++;
-			snprintf(path, sizeof(path), "/dev/%s", u->ut_line);
+			snprintf(path, sizeof(path), "/dev/%s", line);
 			if (check_tty(path, &tty_writeable, &tty_atime, 0))
 				/* bad term? skip */
 				continue;
 			if (ctl->src_uid && !tty_writeable)
 				/* skip ttys with msgs off */
 				continue;
-			if (memcmp(u->ut_line, ctl->src_tty_name, strlen(ctl->src_tty_name) + 1) == 0) {
+			if (strcmp(line, ctl->src_tty_name) == 0) {
 				user_is_me = 1;
 				/* don't write to yourself */
 				continue;
@@ -306,7 +314,6 @@ static void search_utmp(struct write_control *ctl)
 				ctl->dst_tty_name = ctl->dst_tty_path + 5;
 			}
 		}
-
 		endutxent();
 	}
 
